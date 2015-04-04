@@ -5,9 +5,9 @@ import re
 import html2text
 class GoogleSpider(scrapy.Spider):
     name="google"
-    allowed_domains=["google.co.in"]
+    allowed_domains=["google.com"]
     start_urls=[
-        "https://www.google.co.in/search?q=jaguar&num=35&lr&ft=i&cr&safe=images&filter=0&gws_rd=ssl"
+        "https://www.google.com/search?q=jaguar&num=50&gws_rd=ssl,cr&fg=1"
     ]
     
         
