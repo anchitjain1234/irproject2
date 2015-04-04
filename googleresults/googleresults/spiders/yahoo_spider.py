@@ -1,4 +1,5 @@
 import scrapy
+import re
 from googleresults.items import GoogleresultsItem
 from scrapy.selector import Selector
 class YahooSpider(scrapy.Spider):
@@ -17,9 +18,13 @@ class YahooSpider(scrapy.Spider):
         ls=sel.xpath('//h3[@class="title"]/a/@href').extract()
         ds=sel.xpath('//p[@class="lh-18"]').extract()
         for t,l,d in zip(ts,ls,ds):
-            item['title'] = t
-            item['link'] = l   
+            item['title'] = t  
             item['desc'] = d
+            item['link'] = l 
+            p = re.compile(ur'(.*)index.html')
+            gp=re.search(p, l)
+            if gp:
+                item['link'] = gp.group(1)
             yield item              
 
 
