@@ -10,13 +10,13 @@ def algo1(urls,glink,ylink,commonlinks):
         in2=ylink.index(url)
         
         pos=min(in1,in2)
-        """
+        
         algo1res[pos]=url
         """
         temp.append([pos,url])
     temp=sorted(temp,key=lambda l:l[0])
     for i in range(len(commonlinks)):
-        algo1res[i]=temp[i][1]
+        algo1res[i]=temp[i][1]"""
     for url in urls:
         if(url not in algo1res):
             if url in glink:
@@ -106,6 +106,7 @@ for i in range(len(ydata)):
 
 commonlinks= set(glink).intersection(ylink)
 printagg(commonlinks)
-
+print commonlinks
+print len(commonlinks)
 algo1res=algo1(urls, glink, ylink,commonlinks)
 algo2res=algo2(urls, glink, ylink,commonlinks)
