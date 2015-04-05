@@ -1,4 +1,10 @@
 import re
-l="/search?q=jaguar&num=41&lr=&hl=en&ie=UTF-8&prmd=ivns&source=univ&tbm=nws&tbo=u&sa=X&ei=qx8gVZjVNMHiuQTx1YC4AQ&ved=0CLQBEKgC"
-p = re.compile(ur'^[s|i]')
-print re.search(p, l).group()
+l="<span class=\" fz-15px fw-m fc-12th wr-bw\">www.<b><b>jaguar</b></b>.com/index.html</span>"
+p = re.compile(ur'<[^>]*>')
+t=re.sub(p,"", l)
+t= "http://"+t
+p = re.compile(ur'(.*)index.html')
+gp=re.search(p, t)
+if gp:
+    t = gp.group(1)
+print t

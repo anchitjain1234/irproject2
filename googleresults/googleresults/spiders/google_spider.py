@@ -6,10 +6,9 @@ import html2text
 class GoogleSpider(scrapy.Spider):
     name="google"
     allowed_domains=["google.com"]
-    start_urls=[
-        "https://www.google.com/search?q=jaguar&num=50&gws_rd=ssl,cr&fg=1"
-    ]
-    
+    def __init__(self, query=None, *args, **kwargs):
+        super(GoogleSpider, self).__init__(*args, **kwargs)
+        self.start_urls = ['https://www.google.com/search?q='+query+"&num=50&gws_rd=ssl,cr&fg=1"]
         
     def parse(self, response):
         temp=0
