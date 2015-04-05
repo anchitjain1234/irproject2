@@ -2,9 +2,10 @@ import json
 from pprint import pprint
 import html2text
 from bs4 import BeautifulSoup
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 urls=[]
-
+import pylab
+pylab.ion()
 def calcprec(links,manuallinks,prec):
     ct=0
     for i in range(prec):
@@ -104,8 +105,8 @@ def read_raw_json(inputfile,outputfile):
     f.close()
     return data
 
-gdata=read_raw_json("t2.json","google")
-ydata=read_raw_json("items2.json","yahoo")
+gdata=read_raw_json("gtest.json","google")
+ydata=read_raw_json("ytest.json","yahoo")
 
 glink=[]
 ylink=[]
@@ -124,20 +125,26 @@ for i in range(len(ydata)):
 commonlinks= set(glink).intersection(ylink)
 printagg(commonlinks)
 
+
 algo1res=algo1(urls, glink, ylink,commonlinks)
 algo2res=algo2(urls, glink, ylink,commonlinks)
 
-gprec=[]
-yprec=[]
+al1prec=[]
+al2prec=[]
 
 with open("RankedDocuments.txt") as f:
     manuallinks=f.readlines()
 for i in range(6):
     t=calcprec(algo1res,manuallinks,5*(i+1))
-    gprec.append(t)
+    al1prec.append(t)
     t=calcprec(algo2res, manuallinks,5*(i+1))
-    yprec.append(t)
-    
-print gprec
-print yprec
-#plt.plot(gprec,gprec)
+    al2prec.append(t)
+print al1prec
+print al2prec
+plt.gca().set_color_cycle(['blue', 'yellow'])
+plt.plot(al1prec,al1prec,'ro')
+plt.plot(al2prec,al2prec,'bo')
+plt.annotate('local max', xy=(0.2,0 ), xytext=(0.2,.1),
+             arrowprops=dict(facecolor='black', shrink=0.05),
+             )
+n=raw_input("")

@@ -5,49 +5,68 @@ from scrapy.selector import Selector
 class YahooSpider(scrapy.Spider):
     name="yahoo"
     allowed_domains=["search.yahoo.com"]
-    start_urls=[
-        "https://search.yahoo.com/search?p=jaguar&pz=40"
-    ]
+    def __init__(self, query=None, *args, **kwargs):
+        super(YahooSpider, self).__init__(*args, **kwargs)
+        self.start_urls = ['https://search.yahoo.com/search?p='+query+"&pz=30"]   
 
 
     def parse(self, response):
-        #unicode(response.body.decode(response.encoding)).encode('utf-8')
         unicode(response.body.decode(response.encoding)).encode('utf-8')
-        for sel in response.xpath('//div[contains(@class,"dd algo")]'):
+        fo=0
+        for sel in response.xpath('//div[contains(@class,"dd algo fst")]'):
+            if(fo==1):
+                break
             item = GoogleresultsItem()
-            t=sel.xpath('div[@class="compTitle"]/h3[@class="title"]/a/text()').extract()
-                       
-            item['title']=t
-            l=sel.xpath('div[@class="compTitle"]/div/span').extract()
-            l=[x.encode('utf-8') for x in l]
+            t=sel.xpath('div/div[@class="compTitle"]/h3/a').extract()
+            stri=""
+            for i in range(len(t)):
+                stri=stri+" "+t[i]             
+            item['title']=stri            
+            l=sel.xpath('div/div[@class="compTitle"]/h3/a/@href').extract()
+            stri=""
+            for i in range(len(l)):
+                stri=stri+" "+l[i] 
             p = re.compile(ur'<[^>]*>')
-            # Error here .Python expects string here but p is a non utf8 string.
-            t=re.sub(str(p),"", l)
-            t= "http://"+t
+            t=re.sub(p,"", stri)
             p = re.compile(ur'(.*)index.html')
             gp=re.search(p, t)
             if gp:
                 t = gp.group(1)            
-            item['link']=t
-            d=sel.xpath('div[@class="compText aAbs"]/p[@class="lh-18"]/text()').extract()
-            
-            item['desc']=d
+            item['link']=t.strip()
+            d=sel.xpath('div/div[@class="layoutCenter"]/div[@class="compText aAbs"]/p').extract()
+            stri=""
+            for i in range(len(d)):
+                stri=stri+" "+d[i]
+            item['desc']=stri            
             yield item
-        """
-        sel = Selector(response)
-        ts=sel.xpath('//h3[@class="title"]/a/text()').extract()
-        ls=sel.xpath('//h3[@class="title"]/a/@href').extract()
-        ds=sel.xpath('//p[@class="lh-18"]').extract()
-        for t,l,d in zip(ts,ls,ds):
-            item['title'] = t  
-            item['desc'] = d
-            item['link'] = l 
+            fo+=1
+            
+        for sel in response.xpath('//div[contains(@class,"dd algo")]'):
+            item = GoogleresultsItem()   
+            t=sel.xpath('div[@class="compTitle"]/h3[@class="title"]/a').extract()
+            stri=""
+            for i in range(len(t)):
+                stri=stri+" "+t[i]
+            if(stri==""):
+                continue
+            item['title']=stri
+            l=sel.xpath('div[@class="compTitle"]/h3[@class="title"]/a/@href').extract()
+            stri=""
+            for i in range(len(l)):
+                stri=stri+" "+l[i] 
+            p = re.compile(ur'<[^>]*>')
+            t=re.sub(p,"", stri)
             p = re.compile(ur'(.*)index.html')
-            gp=re.search(p, l)
+            gp=re.search(p, t)
             if gp:
-                item['link'] = gp.group(1)
-            yield item           
-            """
+                t = gp.group(1)            
+            item['link']=t.strip()
+            d=sel.xpath('div[@class="compText aAbs"]/p[@class="lh-18"]').extract()
+            stri=""
+            for i in range(len(d)):
+                stri=stri+" "+d[i]
+            item['desc']=stri
+            yield item
 
 
 
