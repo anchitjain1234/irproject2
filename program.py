@@ -1,17 +1,30 @@
 import json
 from pprint import pprint
-import html2text
 from bs4 import BeautifulSoup
 import matplotlib.pyplot as plt
 urls=[]
 import pylab
 pylab.ion()
+
+def spearmancoeff(manuallinks,testlink):
+    x=[]
+    y=[]
+    for i in range(len(manuallinks)):
+        if(manuallinks[i] in testlink):
+            x.append(i+1)
+            y.append(testlink.index(manuallinks[i])+1)
+    d=[]
+    for i,j in zip(x,y):
+        k=i-j
+        d.append(k*k)
+    coeff=1-(6*sum(d))/float((len(y)*(len(y)*len(y)-1)))
+    return "{0:.2f}".format(coeff)
+
 def calcprec(links,manuallinks,prec):
     ct=0
     for i in range(prec):
         t1=links[i].encode('utf-8')
-        t2=manuallinks[i].rstrip()
-        if(t1==t2):
+        if((t1 in manuallinks) and manuallinks.index(t1)<5):
             ct+=1
     t=ct/float(prec)
     return t
@@ -19,6 +32,7 @@ def calcprec(links,manuallinks,prec):
 def algo1(urls,glink,ylink,commonlinks):
     algo1res=[0 for i in range(len(urls))]
     temp=[]
+    
     for url in commonlinks:
         in1=glink.index(url)
         in2=ylink.index(url)
@@ -26,6 +40,7 @@ def algo1(urls,glink,ylink,commonlinks):
         pos=min(in1,in2)
         
         algo1res[pos]=url
+        
         """
         temp.append([pos,url])
     temp=sorted(temp,key=lambda l:l[0])
@@ -87,7 +102,7 @@ def printagg(commonlinks):
     f.close()
     
 def read_raw_json(inputfile,outputfile):
-    path='/home/anchit/py/irproject2/googleresults/googleresults/'+inputfile
+    path='googleresults/googleresults/'+inputfile
     with open(path) as data_file:    
         data = json.load(data_file)
     f=open(outputfile+"urls.txt",'w')
@@ -128,23 +143,50 @@ printagg(commonlinks)
 
 algo1res=algo1(urls, glink, ylink,commonlinks)
 algo2res=algo2(urls, glink, ylink,commonlinks)
-
 al1prec=[]
 al2prec=[]
 
+print "\n\nPlease manually rank the urls and enter in RankedDocuments.txt . "
+n=raw_input("Enter any key to proceed.\n\n")
+
 with open("RankedDocuments.txt") as f:
     manuallinks=f.readlines()
+    
+for i in range(len(manuallinks)):
+    manuallinks[i]=manuallinks[i].rstrip()
+
 for i in range(6):
     t=calcprec(algo1res,manuallinks,5*(i+1))
     al1prec.append(t)
     t=calcprec(algo2res, manuallinks,5*(i+1))
     al2prec.append(t)
-print al1prec
-print al2prec
+#print al1prec
+#print al2prec
+
 plt.gca().set_color_cycle(['blue', 'yellow'])
-plt.plot(al1prec,al1prec,'ro')
-plt.plot(al2prec,al2prec,'bo')
-plt.annotate('local max', xy=(0.2,0 ), xytext=(0.2,.1),
-             arrowprops=dict(facecolor='black', shrink=0.05),
-             )
-n=raw_input("")
+A=[5,10,15,20,25,30]
+plt.plot(A,al1prec,label="Best Rank Preicision",linestyle='--', marker='o')
+plt.plot(A,al2prec,label="Borda's Approach Precision", marker='o')
+plt.axis([0,35,0,1])
+
+# Place a legend to the right of this smaller figure.
+plt.legend(bbox_to_anchor=(.05, .97), loc=2, borderaxespad=0.)
+for xy in zip(A, al1prec):                                                # <--
+    plt.annotate('(%s, %s)' % xy, xy=xy, textcoords='offset points')
+    
+for xy in zip(A, al2prec):                                                # <--
+    plt.annotate('(%s, %s)' % xy, xy=xy, textcoords='offset points')
+
+
+mapalgo1=sum(al1prec)/float(6)
+mapalgo2=sum(al2prec)/float(6)
+
+print "\nMAP for Best Rank Approach= "+str(mapalgo1)
+print "MAP for Borda's Approach= "+str(mapalgo2)
+
+algo1spearman=spearmancoeff(manuallinks, glink)
+print "Spearman coefficient for Best Rank Approach= "+str(algo1spearman)
+algo2spearman=spearmancoeff(manuallinks, ylink)
+print "Spearman coefficient for Borda's Approach= "+str(algo2spearman)
+print "\nPlease check output files generated \n"
+n=raw_input("\n\nEnter any key to proceed.")

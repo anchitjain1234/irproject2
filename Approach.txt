@@ -1,0 +1,4 @@
+1. Scrape top 30 results from google and yahoo and store the scraped data in JSON format.
+2. Read from JSON to a list and print various output files.
+3. Run the two algorithms described to rank the retrieved urls.
+4. Calculate MAP and  Spearman Correlation Coefficient for both the algorithms and plot the precison.
